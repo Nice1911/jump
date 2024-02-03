@@ -1,0 +1,43 @@
+-- Define the maximum time to wait before performing an action (in seconds)
+local MAX_IDLE_TIME = 60
+
+-- Function to randomly move the character
+local function randomMove()
+    local character = game.Players.LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            local randomVector = Vector3.new(math.random(-5, 5), math.random(-5, 5), math.random(-5, 5))
+            local newPosition = character.Position + randomVector
+            humanoid:MoveTo(newPosition)
+        end
+    end
+end
+
+-- Function to reset the idle timer
+local function resetIdleTimer()
+    idleTime = 0
+end
+
+-- Listen for the Heartbeat event to track user activity
+game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+    if not game.Players.LocalPlayer then return end
+
+    -- Update idle time
+    idleTime = (idleTime or 0) + deltaTime
+
+    -- Check if idle time exceeds the maximum allowed time
+    if idleTime >= MAX_IDLE_TIME then
+        -- Perform an action to prevent being kicked (e.g., move the character)
+        randomMove()
+        resetIdleTimer()
+    end
+end)
+
+-- Reset idle timer when the player interacts with the game
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or
+        input.UserInputType == Enum.UserInputType.Keyboard then
+        resetIdleTimer()
+    end
+end)
